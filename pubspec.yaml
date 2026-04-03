@@ -1,0 +1,46 @@
+name: ecommerce_app
+description: "A new Flutter project."
+
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.1
+
+dependencies:
+  cached_network_image: ^3.4.1
+  cupertino_icons: ^1.0.9
+  firebase_auth: ^6.3.0
+  firebase_core: ^4.6.0
+  flutter:
+    sdk: flutter
+  flutter_bloc: ^9.1.1
+  flutter_carousel_widget: ^3.1.0
+  flutter_dash: ^1.0.0
+  flutter_native_splash: ^2.4.7
+  font_awesome_flutter: ^11.0.0
+  persistent_bottom_nav_bar_v2: ^6.3.2
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+
+  uses-material-design: true
+  # assets:
+  #   - images/a_dot_burr.jpeg
+  #   - images/a_dot_ham.jpeg
+
+flutter_native_splash:
+  color: "#512DA8"
+  image: lib/assets/images/pngwing.com.png
+  fullscreen: false
+  android_12:
+    # background color
+    color: "#512DA8"
+    # color_dark: "#042a49"
+    image: lib/assets/images/pngwing.com.png
+    #icon_background_color: "#111111"
