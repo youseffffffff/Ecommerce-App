@@ -1,6 +1,7 @@
 import 'package:ecommerce_app/models/cart.items.model.dart';
 import 'package:ecommerce_app/models/product_items_model.dart';
 import 'package:ecommerce_app/utils/App_Routes.dart';
+import 'package:ecommerce_app/view_models/auth/auth_cubit.dart';
 import 'package:ecommerce_app/view_models/checkout/cubit/checkout_cubit.dart';
 import 'package:ecommerce_app/view_models/home/cubit/Home_cubit.dart';
 import 'package:ecommerce_app/view_models/product/cubit/product_cubit.dart';
@@ -21,7 +22,7 @@ class AppRouters {
       case AppRoutes.login:
         return MaterialPageRoute(
           builder: (_) => BlocProvider(
-            create: (context) => UserCubit(),
+            create: (context) => AuthCubit(),
             child: const LoginPage(),
           ),
           settings: routeSettings,
@@ -31,7 +32,7 @@ class AppRouters {
       case AppRoutes.register:
         return MaterialPageRoute(
           builder: (_) => BlocProvider(
-            create: (context) => UserCubit(),
+            create: (context) => AuthCubit(),
             child: const Register(),
           ),
           settings: routeSettings,
