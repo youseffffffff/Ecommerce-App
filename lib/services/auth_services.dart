@@ -7,6 +7,8 @@ abstract class AuthServices {
     String username,
     String password,
   );
+  User? currentUser();
+  Future<void> logout();
 }
 
 class AuthServicesImpl implements AuthServices {
@@ -14,11 +16,11 @@ class AuthServicesImpl implements AuthServices {
 
   @override
   Future<bool> signInWithUserNameAndPassword(
-    String username,
+    String email,
     String password,
   ) async {
     UserCredential userCredential = await _firebaseAuth
-        .signInWithEmailAndPassword(email: username, password: password);
+        .signInWithEmailAndPassword(email: email, password: password);
 
     final user = userCredential.user;
 
@@ -31,11 +33,11 @@ class AuthServicesImpl implements AuthServices {
 
   @override
   Future<bool> registerWithUserNameAndPassword(
-    String username,
+    String email,
     String password,
   ) async {
     UserCredential userCredential = await _firebaseAuth
-        .createUserWithEmailAndPassword(email: username, password: password);
+        .createUserWithEmailAndPassword(email: email, password: password);
     final user = userCredential.user;
 
     if (user == null) {
@@ -43,5 +45,17 @@ class AuthServicesImpl implements AuthServices {
     } else {
       return true;
     }
+  }
+
+  @override
+  User? currentUser() {
+    final result = _firebaseAuth.currentUser;
+
+    return result;
+  }
+
+  @override
+  Future<void> logout() async {
+    await _firebaseAuth.signOut();
   }
 }

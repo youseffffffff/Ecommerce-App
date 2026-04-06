@@ -1,6 +1,8 @@
+import 'package:ecommerce_app/models/user.dart';
 import 'package:ecommerce_app/utils/App_Routes.dart';
 import 'package:ecommerce_app/utils/app_colors.dart';
 import 'package:ecommerce_app/utils/current_user.dart';
+import 'package:ecommerce_app/view_models/auth/auth_cubit.dart';
 import 'package:ecommerce_app/view_models/user/cubit/user_cubit.dart';
 import 'package:ecommerce_app/views/widgets/soialMediaBottun_Widget.dart';
 import 'package:flutter/material.dart';
@@ -17,8 +19,6 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
-    final cubit = BlocProvider.of<UserCubit>(context);
-
     final passwordController = TextEditingController();
     final emailController = TextEditingController();
 
@@ -55,6 +55,8 @@ class _LoginPageState extends State<LoginPage> {
         ),
       );
     }
+
+    final cubit = BlocProvider.of<AuthCubit>(context);
 
     return Scaffold(
       body: SafeArea(
@@ -130,17 +132,15 @@ class _LoginPageState extends State<LoginPage> {
 
               SizedBox(height: 8),
 
-              BlocConsumer<UserCubit, UserState>(
+              BlocConsumer<AuthCubit, AuthState>(
                 bloc: cubit,
 
                 listenWhen: (previous, current) =>
-                    current is UserSearchNotFound ||
-                    current is UserSearchField ||
-                    current is UserSearched,
+                    current is AuthFailure || current is AuthSuccess,
 
                 listener: (context, state) {
-                  if (state is UserSearched) {
-                    currentUser = state.user;
+                  if (state is AuthSuccess) {
+                    currentUser = users[0];
 
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
@@ -149,9 +149,11 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     );
 
-                    Navigator.of(context).pushReplacementNamed(AppRoutes.home);
+                    Navigator.of(
+                      context,
+                    ).pushNamedAndRemoveUntil(AppRoutes.home, (route) => false);
                   }
-                  if (state is UserSearchNotFound) {
+                  if (state is AuthFailure) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text('Incurrect Password Or Email.'),
@@ -174,7 +176,7 @@ class _LoginPageState extends State<LoginPage> {
                 },
 
                 builder: (context, state) {
-                  if (state is UserSearching) {
+                  if (state is AuthLoading) {
                     return SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
@@ -198,7 +200,7 @@ class _LoginPageState extends State<LoginPage> {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () {
-                        cubit.findUser(
+                        cubit.login(
                           email: emailController.text,
                           password: passwordController.text,
                         );
@@ -237,7 +239,10 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         TextButton(
                           onPressed: () {
-                            Navigator.of(context).pushNamed(AppRoutes.register);
+                            Navigator.of(context).pushNamedAndRemoveUntil(
+                              AppRoutes.register,
+                              (route) => false,
+                            );
                           },
                           child: Text(
                             'register',

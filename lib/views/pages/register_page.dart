@@ -1,7 +1,6 @@
 import 'package:ecommerce_app/utils/App_Routes.dart';
 import 'package:ecommerce_app/utils/app_colors.dart';
-import 'package:ecommerce_app/view_models/user/cubit/user_cubit.dart';
-import 'package:ecommerce_app/models/user.dart';
+import 'package:ecommerce_app/view_models/auth/auth_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -15,7 +14,7 @@ class Register extends StatefulWidget {
 class _RegisterState extends State<Register> {
   @override
   Widget build(BuildContext context) {
-    final cubit = BlocProvider.of<UserCubit>(context);
+    final cubit = BlocProvider.of<AuthCubit>(context);
     final nameController = TextEditingController();
     final emailController = TextEditingController();
     final passwordController = TextEditingController();
@@ -131,12 +130,12 @@ class _RegisterState extends State<Register> {
                 obscure: true,
               ),
               SizedBox(height: 24),
-              BlocConsumer<UserCubit, UserState>(
+              BlocConsumer<AuthCubit, AuthState>(
                 bloc: cubit,
                 listenWhen: (previous, current) =>
-                    current is UserAdded || current is UserAddField,
+                    current is AuthSuccess || current is AuthFailure,
                 listener: (context, state) {
-                  if (state is UserAdded) {
+                  if (state is AuthSuccess) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text('Account created successfully.'),
@@ -145,17 +144,18 @@ class _RegisterState extends State<Register> {
                     );
                     Navigator.of(context).pushReplacementNamed(AppRoutes.login);
                   }
-                  if (state is UserAddField) {
+                  if (state is AuthFailure) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text(state.message),
+                        content: Text(state.errorMessage),
                         backgroundColor: AppColors.red,
                       ),
                     );
                   }
                 },
+
                 builder: (context, state) {
-                  if (state is UserAdding) {
+                  if (state is AuthLoading) {
                     return SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
@@ -199,14 +199,9 @@ class _RegisterState extends State<Register> {
                           );
                           return;
                         }
-                        cubit.addUser(
-                          user: UserData(
-                            id: DateTime.now().millisecondsSinceEpoch
-                                .toString(),
-                            fullName: nameController.text,
-                            email: emailController.text,
-                            password: passwordController.text,
-                          ),
+                        cubit.register(
+                          email: emailController.text,
+                          password: passwordController.text,
                         );
                       },
                       style: ElevatedButton.styleFrom(
