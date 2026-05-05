@@ -35,7 +35,7 @@ class _BottomNavbarState extends State<BottomNavbar> {
       BlocProvider(
         create: (context) {
           final cubit = CartCubit();
-          cubit.getCartItems();
+          cubit.fetchCartItems(currentUser!.id);
           return cubit;
         },
         child: const CartPage(),
@@ -70,7 +70,7 @@ class _BottomNavbarState extends State<BottomNavbar> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  currentUser!.fullName.split(' ')[0],
+                  currentUser!.userName.split(' ')[0],
                   style: Theme.of(
                     context,
                   ).textTheme.bodySmall!.copyWith(fontWeight: FontWeight.bold),

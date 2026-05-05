@@ -28,17 +28,15 @@ final class ProductFavoriteChanged extends ProductState {
 }
 
 final class QuantityLoaded extends ProductState {
-  final Product product;
   final int quantity;
 
-  QuantityLoaded({required this.product, required this.quantity});
+  QuantityLoaded({required this.quantity});
 }
 
 final class SizeSelected extends ProductState {
   final ProductSize productSize;
-  final Product product;
 
-  SizeSelected({required this.productSize, required this.product});
+  SizeSelected({required this.productSize});
 }
 
 final class CartIsAdding extends ProductState {}

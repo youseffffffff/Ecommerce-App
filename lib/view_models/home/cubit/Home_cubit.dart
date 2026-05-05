@@ -1,22 +1,26 @@
 import 'package:bloc/bloc.dart';
 import 'package:ecommerce_app/models/product_items_model.dart';
+import 'package:ecommerce_app/services/preducts.dart';
 import 'package:meta/meta.dart';
 
 part 'Home_state.dart';
 
 class HomeCubit extends Cubit<HomeState> {
-  HomeCubit() : super(HomeInitial());
+  final ProductService _productService;
+
+  HomeCubit({ProductService? productService})
+    : _productService = productService ?? ProductService(),
+      super(HomeInitial());
 
   void getHomeContent() {
     emit(HomeLoading());
-
-    try {
-      // Simulate loading products
-      Future.delayed(Duration(seconds: 1), () {
-        emit(HomeLoaded(products: products));
-      });
-    } catch (e) {
-      emit(HomeError());
-    }
+    _productService.getProductsStream().listen(
+      (productList) {
+        emit(HomeLoaded(products: productList));
+      },
+      onError: (e) {
+        emit(HomeError(message: e.toString()));
+      },
+    );
   }
 }

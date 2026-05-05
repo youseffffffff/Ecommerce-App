@@ -2,7 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:ecommerce_app/models/address.dart';
 import 'package:ecommerce_app/models/paymentMethod.model.dart';
 import 'package:ecommerce_app/utils/App_Routes.dart';
-import 'package:ecommerce_app/views/pages/PaymentMethod_page.dart';
+import 'package:ecommerce_app/utils/current_user.dart';
 import 'package:ecommerce_app/views/widgets/empty_PaymentMethodOrAddress_Widget.dart';
 import 'package:ecommerce_app/views/widgets/full_Address_Widget.dart';
 import 'package:ecommerce_app/views/widgets/full_PaymentMethod_Widget.dart';
@@ -39,7 +39,11 @@ class _CheckoutWidgetState extends State<CheckoutWidget> {
           onClick: () {
             Navigator.of(context, rootNavigator: true)
                 .pushNamed(AppRoutes.address)
-                .then((value) => checkoutCubit.loadCheckout());
+                .then(
+                  (value) async => await checkoutCubit.loadCheckoutFromServer(
+                    currentUser!.id,
+                  ),
+                );
             //checkoutCubit.loadCheckout();
           },
           title: 'Add new address',
@@ -50,7 +54,11 @@ class _CheckoutWidgetState extends State<CheckoutWidget> {
           onClick: () {
             Navigator.of(context, rootNavigator: true)
                 .pushNamed(AppRoutes.address)
-                .then((value) => checkoutCubit.loadCheckout());
+                .then(
+                  (value) async => await checkoutCubit.loadCheckoutFromServer(
+                    currentUser!.id,
+                  ),
+                );
           },
 
           //checkoutCubit.loadCheckout();
@@ -66,7 +74,11 @@ class _CheckoutWidgetState extends State<CheckoutWidget> {
           onClick: () {
             Navigator.of(context, rootNavigator: true)
                 .pushNamed(AppRoutes.paymentMethod)
-                .then((value) => checkoutCubit.loadCheckout());
+                .then(
+                  (value) async => await checkoutCubit.loadCheckoutFromServer(
+                    currentUser!.id,
+                  ),
+                );
             //checkoutCubit.loadCheckout();
           },
           title: 'Add new payment',
@@ -84,7 +96,10 @@ class _CheckoutWidgetState extends State<CheckoutWidget> {
                   child: const PaymentMethodsItems(),
                 );
               },
-            ).then((value) => checkoutCubit.loadCheckout());
+            ).then(
+              (value) async =>
+                  await checkoutCubit.loadCheckoutFromServer(currentUser!.id),
+            );
             //checkoutCubit.loadCheckout();
           },
           method: method,

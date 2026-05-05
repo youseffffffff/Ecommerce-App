@@ -24,7 +24,7 @@ final class CheckoutLoaded extends CheckoutState {
 final class CheckoutError extends CheckoutState {
   final String message;
 
-  CheckoutError(this.message);
+  CheckoutError({required this.message});
 }
 
 final class PaymentMethodsLoading extends CheckoutState {}
@@ -59,34 +59,34 @@ final class PaymentMethodChanged extends CheckoutState {
   PaymentMethodChanged({required this.currentCardId});
 }
 
-final class AddressLoading extends CheckoutState {}
+class AddressLoading extends CheckoutState {}
 
-final class AddressLoaded extends CheckoutState {
+class AddressLoaded extends CheckoutState {
   final List<Address> addresses;
 
   AddressLoaded({required this.addresses});
 }
 
-final class AddressAdding extends CheckoutState {}
+class AddressAdding extends CheckoutState {}
 
-final class AddressAdded extends CheckoutState {}
+class AddressAdded extends CheckoutState {}
 
-final class AddressField extends CheckoutState {
-  final String messageError;
+class AddressChoosing extends CheckoutState {}
 
-  AddressField({required this.messageError});
+class AddressChoosen extends CheckoutState {
+  final String addressId;
+
+  AddressChoosen({required this.addressId});
 }
 
-final class AddressChoosing extends CheckoutState {}
-
-final class AddressChoosen extends CheckoutState {
-  final Address address;
-
-  AddressChoosen({required this.address});
-}
-
-final class AddressChanged extends CheckoutState {
+class AddressChanged extends CheckoutState {
   final String addressId;
 
   AddressChanged({required this.addressId});
+}
+
+class AddressError extends CheckoutState {
+  final String message;
+
+  AddressError({required this.message});
 }

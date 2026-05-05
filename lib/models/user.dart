@@ -1,23 +1,33 @@
 class UserData {
   final String id;
-  final String fullName;
+  final String userName;
   final String email;
-  final String password;
+  final DateTime createdAt;
 
   UserData({
     required this.id,
     required this.email,
-    required this.fullName,
-    required this.password,
+    required this.userName,
+    required this.createdAt,
   });
-}
 
-List<UserData> users = [
-  UserData(
-    id: '1',
-    email: '1',
-    fullName: 'Yousef Faiz Al-otaibi',
-    password: '1',
-  ),
-  UserData(id: '2', email: '2', fullName: 'mohammed alotaibi', password: '2'),
-];
+  // Convert UserData to JSON
+  Map<String, dynamic> toMap() => {
+    'id': id,
+    'userName': userName,
+    'email': email,
+    'createdAt': createdAt.toIso8601String(),
+  };
+
+  // Create UserData from JSON
+  factory UserData.fromMap(Map<String, dynamic> map) {
+    return UserData(
+      id: map['id'] ?? '',
+      userName: map['userName'] ?? '',
+      email: map['email'] ?? '',
+      createdAt: DateTime.parse(
+        map['createdAt'] ?? DateTime.now().toIso8601String(),
+      ),
+    );
+  }
+}

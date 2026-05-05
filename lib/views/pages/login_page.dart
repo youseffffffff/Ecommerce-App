@@ -1,8 +1,10 @@
+import 'package:ecommerce_app/models/product_items_model.dart';
 import 'package:ecommerce_app/models/user.dart';
 import 'package:ecommerce_app/utils/App_Routes.dart';
 import 'package:ecommerce_app/utils/app_colors.dart';
 import 'package:ecommerce_app/utils/current_user.dart';
 import 'package:ecommerce_app/view_models/auth/auth_cubit.dart';
+import 'package:ecommerce_app/view_models/product/cubit/product_cubit.dart';
 import 'package:ecommerce_app/view_models/user/cubit/user_cubit.dart';
 import 'package:ecommerce_app/views/widgets/soialMediaBottun_Widget.dart';
 import 'package:flutter/material.dart';
@@ -140,7 +142,7 @@ class _LoginPageState extends State<LoginPage> {
 
                 listener: (context, state) {
                   if (state is AuthSuccess) {
-                    currentUser = users[0];
+                    currentUser = state.user;
 
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
@@ -199,8 +201,8 @@ class _LoginPageState extends State<LoginPage> {
                   return SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {
-                        cubit.login(
+                      onPressed: () async {
+                        await cubit.login(
                           email: emailController.text,
                           password: passwordController.text,
                         );
@@ -267,18 +269,56 @@ class _LoginPageState extends State<LoginPage> {
 
               SizedBox(height: 32),
 
-              SoialMediaBottun(
-                icon: Icon(Icons.facebook, color: Colors.blue, size: 36),
-                title: 'Facebook',
-                event: () {},
-              ),
+              BlocConsumer<AuthCubit, AuthState>(
+                bloc: cubit,
+                listenWhen: (previous, current) =>
+                    current is gAuthFailure || current is gAuthSuccess,
+                listener: (context, state) {
+                  if (state is gAuthSuccess) {
+                    currentUser = state.result;
 
-              SizedBox(height: 8),
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Success.'),
+                        backgroundColor: AppColors.green,
+                      ),
+                    );
 
-              SoialMediaBottun(
-                icon: Icon(Icons.g_mobiledata, color: Colors.red, size: 36),
-                title: 'Google',
-                event: () {},
+                    Navigator.of(
+                      context,
+                    ).pushNamedAndRemoveUntil(AppRoutes.home, (route) => false);
+                  }
+                  if (state is gAuthFailure) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Google Sign-In Failed.'),
+                        backgroundColor: AppColors.red,
+                      ),
+                    );
+                  }
+                },
+
+                builder: (context, state) {
+                  if (state is gAuthLoading) {
+                    return SoialMediaBottun(
+                      icon: CircularProgressIndicator(
+                        strokeWidth: 2.0,
+                        color: AppColors.white,
+                      ),
+                      title: 'Google',
+                      event: () async {
+                        await cubit.signInWithGoogle();
+                      },
+                    );
+                  }
+                  return SoialMediaBottun(
+                    icon: Icon(Icons.g_mobiledata, color: Colors.red, size: 36),
+                    title: 'Google',
+                    event: () async {
+                      await cubit.signInWithGoogle();
+                    },
+                  );
+                },
               ),
             ],
           ),

@@ -9,7 +9,9 @@ environment:
   sdk: ^3.10.1
 
 dependencies:
+  meta: ^1.11.0
   cached_network_image: ^3.4.1
+  cloud_firestore: ^6.3.0
   cupertino_icons: ^1.0.9
   firebase_auth: ^6.3.0
   firebase_core: ^4.6.0
@@ -18,8 +20,10 @@ dependencies:
   flutter_bloc: ^9.1.1
   flutter_carousel_widget: ^3.1.0
   flutter_dash: ^1.0.0
+  flutter_facebook_auth: ^7.1.6
   flutter_native_splash: ^2.4.7
   font_awesome_flutter: ^11.0.0
+  google_sign_in: ^6.3.0
   persistent_bottom_nav_bar_v2: ^6.3.2
 
 dev_dependencies:

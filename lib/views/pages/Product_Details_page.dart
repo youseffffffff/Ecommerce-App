@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:ecommerce_app/models/product_items_model.dart';
 import 'package:ecommerce_app/utils/app_colors.dart';
+import 'package:ecommerce_app/utils/current_user.dart';
 import 'package:ecommerce_app/utils/messenger.dart';
 import 'package:ecommerce_app/view_models/product/cubit/product_cubit.dart';
 import 'package:ecommerce_app/views/widgets/counter_Widget.dart';
@@ -8,6 +9,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ProductDetails extends StatefulWidget {
+  final String productID;
+
+  const ProductDetails({Key? key, required this.productID}) : super(key: key);
+
   @override
   State<ProductDetails> createState() => _ProductDetailsState();
 }
@@ -16,9 +21,12 @@ class _ProductDetailsState extends State<ProductDetails> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final cubit = BlocProvider.of<ProductCubit>(context);
+
+    Product productDetails;
 
     return BlocBuilder<ProductCubit, ProductState>(
-      bloc: context.read<ProductCubit>(),
+      bloc: cubit,
 
       buildWhen: (previous, current) =>
           current is ProductLoading ||
@@ -46,6 +54,7 @@ class _ProductDetailsState extends State<ProductDetails> {
             body: Center(child: Text('No product details available')),
           );
         } else if (state is ProductLoaded) {
+          productDetails = state.product;
           return Scaffold(
             extendBodyBehindAppBar: true,
             appBar: AppBar(
@@ -65,7 +74,7 @@ class _ProductDetailsState extends State<ProductDetails> {
                       current is ProductFavoriteChanged ||
                       current is ProductLoaded,
 
-                  bloc: BlocProvider.of<ProductCubit>(context),
+                  bloc: cubit,
 
                   builder: (context, state) {
                     if (state is ProductFavoriteChanged) {
@@ -77,9 +86,7 @@ class _ProductDetailsState extends State<ProductDetails> {
                           color: AppColors.black,
                         ),
                         onPressed: () {
-                          BlocProvider.of<ProductCubit>(
-                            context,
-                          ).changeFavoriteStatus(state.product);
+                          cubit.changeFavoriteStatus(state.product);
                         },
                       );
                     } else if (state is ProductLoaded) {
@@ -91,9 +98,7 @@ class _ProductDetailsState extends State<ProductDetails> {
                           color: AppColors.black,
                         ),
                         onPressed: () {
-                          BlocProvider.of<ProductCubit>(
-                            context,
-                          ).changeFavoriteStatus(state.product);
+                          cubit.changeFavoriteStatus(state.product);
                         },
                       );
                     } else {
@@ -165,7 +170,7 @@ class _ProductDetailsState extends State<ProductDetails> {
                             Spacer(),
 
                             BlocBuilder<ProductCubit, ProductState>(
-                              bloc: BlocProvider.of<ProductCubit>(context),
+                              bloc: cubit,
 
                               buildWhen: (previous, current) =>
                                   current is QuantityLoaded ||
@@ -175,24 +180,40 @@ class _ProductDetailsState extends State<ProductDetails> {
                                 if (state is QuantityLoaded) {
                                   return CounterWidget(
                                     quantity: state.quantity,
-                                    cupit: BlocProvider.of<ProductCubit>(
-                                      context,
-                                    ),
-                                    productId: state.product.id,
-                                    size: BlocProvider.of<ProductCubit>(
-                                      context,
-                                    ).selectedSize,
+                                    productId: productDetails!.id,
+                                    size: cubit.selectedSize,
+                                    userId: currentUser!.id,
+                                    actionIfIncrement: () {
+                                      cubit.incrementQuantity(
+                                        currentUser!.id,
+                                        cubit.selectedSize,
+                                      );
+                                    },
+                                    actionIfDecrement: () {
+                                      cubit.decrementQuantity(
+                                        currentUser!.id,
+                                        cubit.selectedSize,
+                                      );
+                                    },
                                   );
                                 } else if (state is ProductLoaded) {
                                   return CounterWidget(
                                     quantity: 1,
-                                    cupit: BlocProvider.of<ProductCubit>(
-                                      context,
-                                    ),
                                     productId: state.product.id,
-                                    size: BlocProvider.of<ProductCubit>(
-                                      context,
-                                    ).selectedSize,
+                                    size: cubit.selectedSize,
+                                    userId: currentUser!.id,
+                                    actionIfIncrement: () {
+                                      cubit.incrementQuantity(
+                                        currentUser!.id,
+                                        cubit.selectedSize,
+                                      );
+                                    },
+                                    actionIfDecrement: () {
+                                      cubit.decrementQuantity(
+                                        currentUser!.id,
+                                        cubit.selectedSize,
+                                      );
+                                    },
                                   );
                                 } else {
                                   return Container();
@@ -216,7 +237,7 @@ class _ProductDetailsState extends State<ProductDetails> {
                           SizedBox(height: size.height * 0.001),
 
                           BlocBuilder<ProductCubit, ProductState>(
-                            bloc: BlocProvider.of<ProductCubit>(context),
+                            bloc: cubit,
 
                             buildWhen: (previous, current) =>
                                 current is SizeSelected ||
@@ -268,7 +289,7 @@ class _ProductDetailsState extends State<ProductDetails> {
                                 );
                               } else if (state is SizeSelected) {
                                 return Row(
-                                  children: state.product.availableSizes!
+                                  children: productDetails!.availableSizes!
                                       .map(
                                         (size) => InkWell(
                                           onTap: () {
@@ -276,7 +297,7 @@ class _ProductDetailsState extends State<ProductDetails> {
                                               context,
                                             ).selectSize(
                                               size,
-                                              state.product.id,
+                                              productDetails!.id,
                                             );
                                           },
                                           child: Container(
@@ -375,7 +396,7 @@ class _ProductDetailsState extends State<ProductDetails> {
                             ),
 
                             BlocBuilder<ProductCubit, ProductState>(
-                              bloc: BlocProvider.of<ProductCubit>(context),
+                              bloc: cubit,
                               buildWhen: (previous, current) =>
                                   current is CartIsAdding ||
                                   current is CartIsAdded ||
@@ -458,18 +479,17 @@ class _ProductDetailsState extends State<ProductDetails> {
                                               .product
                                               .availableSizes!
                                               .isNotEmpty &&
-                                          BlocProvider.of<ProductCubit>(
-                                                context,
-                                              ).selectedSize ==
+                                          cubit.selectedSize ==
                                               ProductSize.none) {
                                         Messenger.showMessage(
                                           context,
                                           "Please select a size before adding to cart.",
                                         );
                                       } else {
-                                        BlocProvider.of<ProductCubit>(
-                                          context,
-                                        ).addToCart(state.product);
+                                        cubit.addToCart(
+                                          state.product,
+                                          currentUser!.id,
+                                        );
                                       }
                                     },
                                     icon: Icon(

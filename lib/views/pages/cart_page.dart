@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:ecommerce_app/models/cart.items.model.dart';
 import 'package:ecommerce_app/utils/App_Routes.dart';
 import 'package:ecommerce_app/utils/app_colors.dart';
+import 'package:ecommerce_app/utils/current_user.dart';
 import 'package:ecommerce_app/view_models/cart/cubit/cart_cubit.dart';
 import 'package:ecommerce_app/views/widgets/counter_Widget.dart';
 import 'package:flutter/material.dart';
@@ -57,6 +58,7 @@ class _CartPageState extends State<CartPage> {
                     itemCount: state.items.length,
                     itemBuilder: (context, index) {
                       final item = state.items[index];
+                      // TODO: اجلب userId الصحيح من مزود المستخدم أو AuthCubit
                       return Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Row(
@@ -68,7 +70,6 @@ class _CartPageState extends State<CartPage> {
                                 height: size.height * 0.14,
                                 width: size.width * 0.3,
                                 fit: BoxFit.cover,
-
                                 errorWidget: (context, url, error) => Container(
                                   height: size.height * 0.1,
                                   width: size.width * 0.2,
@@ -90,60 +91,95 @@ class _CartPageState extends State<CartPage> {
 
                             SizedBox(width: size.width * 0.03),
 
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-
-                              children: [
-                                Text(item.product.name),
-                                Text.rich(
-                                  TextSpan(
-                                    text: 'Size: ',
-                                    style: TextStyle(color: Colors.grey),
-                                    children: [
-                                      TextSpan(
-                                        text: item.size.name.toUpperCase(),
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.black,
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(item.product.name),
+                                  Text.rich(
+                                    TextSpan(
+                                      text: 'Size: ',
+                                      style: TextStyle(color: Colors.grey),
+                                      children: [
+                                        TextSpan(
+                                          text: item.size.name.toUpperCase(),
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.black,
+                                          ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
-                                ),
-
-                                SizedBox(height: size.height * 0.03),
-
-                                BlocBuilder<CartCubit, CartState>(
-                                  buildWhen: (previous, current) =>
-                                      current is QuantityLoaded &&
-                                          current.cart.product.id ==
+                                  SizedBox(height: size.height * 0.03),
+                                  BlocBuilder<CartCubit, CartState>(
+                                    buildWhen: (previous, current) =>
+                                        current is QuantityLoaded &&
+                                            current.cart.product.id ==
+                                                item.product.id &&
+                                            current.cart.size == item.size ||
+                                        current is CartLoaded,
+                                    builder: (context, state) {
+                                      if (state is QuantityLoaded &&
+                                          state.cart.product.id ==
                                               item.product.id &&
-                                          current.cart.size == item.size ||
-                                      current is CartLoaded,
-                                  builder: (context, state) {
-                                    if (state is QuantityLoaded &&
-                                        state.cart.product.id ==
-                                            item.product.id &&
-                                        state.cart.size == item.size) {
-                                      return CounterWidget(
-                                        quantity: state.quantity,
-                                        cupit: cubit,
-                                        productId: state.cart.product.id,
-                                        size: state.cart.size,
-                                      );
-                                    } else {
-                                      return CounterWidget(
-                                        quantity: item.quantity,
-                                        cupit: cubit,
-                                        productId: item.product.id,
-                                        size: item.size,
-                                      );
-                                    }
-                                  },
-                                ),
-                              ],
+                                          state.cart.size == item.size) {
+                                        return SizedBox(
+                                          width: size.width * 0.28,
+                                          child: CounterWidget(
+                                            quantity: state.quantity,
+                                            productId: state.cart.product.id,
+                                            size: state.cart.size,
+                                            userId: currentUser!.id,
+                                            actionIfIncrement: () async {
+                                              await cubit.incrementQuantity(
+                                                currentUser!.id,
+                                                item.product.id,
+                                                item.size,
+                                              );
+                                            },
+                                            actionIfDecrement: () async {
+                                              await cubit.decrementQuantity(
+                                                currentUser!.id,
+                                                item.product.id,
+                                                item.size,
+                                              );
+                                            },
+                                          ),
+                                        );
+                                      } else {
+                                        return SizedBox(
+                                          width:
+                                              size.width *
+                                              0.28, // أو الحجم المناسب حسب التصميم
+                                          child: CounterWidget(
+                                            quantity: item.quantity,
+                                            actionIfIncrement: () async {
+                                              await cubit.incrementQuantity(
+                                                currentUser!.id,
+                                                item.product.id,
+                                                item.size,
+                                              );
+                                            },
+                                            actionIfDecrement: () async {
+                                              await cubit.decrementQuantity(
+                                                currentUser!.id,
+                                                item.product.id,
+                                                item.size,
+                                              );
+                                            },
+                                            productId: item.product.id,
+                                            size: item.size,
+                                            userId: currentUser!.id,
+                                          ),
+                                        );
+                                      }
+                                    },
+                                  ),
+                                ],
+                              ),
                             ),
-                            Spacer(),
+                            //Spacer(),
                             BlocBuilder<CartCubit, CartState>(
                               buildWhen: (previous, current) =>
                                   current is QuantityLoaded &&
@@ -151,7 +187,6 @@ class _CartPageState extends State<CartPage> {
                                           item.product.id &&
                                       current.cart.size == item.size ||
                                   current is CartLoaded,
-
                               builder: (context, state) {
                                 if (state is QuantityLoaded &&
                                     state.cart.product.id == item.product.id &&
@@ -291,10 +326,7 @@ class _CartPageState extends State<CartPage> {
                                 Navigator.of(
                                   context,
                                   rootNavigator: true,
-                                ).pushNamed(
-                                  AppRoutes.checkout,
-                                  arguments: state.items,
-                                );
+                                ).pushNamed(AppRoutes.checkout);
                               },
 
                               child: Text(
