@@ -113,12 +113,12 @@ class _AddressPageState extends State<AddressPage> {
             buildWhen: (previous, current) =>
                 current is AddressLoaded ||
                 current is AddressLoading ||
-                current is AddressField,
+                current is AddressError,
             builder: (context, state) {
               if (state is AddressLoading) {
                 return const Center(child: CircularProgressIndicator());
-              } else if (state is AddressField) {
-                return Center(child: Text(state.messageError));
+              } else if (state is AddressError) {
+                return Center(child: Text(state.message));
               } else if (state is AddressLoaded) {
                 final addresses = state.addresses;
                 TextEditingController _addressController =
@@ -185,7 +185,7 @@ class _AddressPageState extends State<AddressPage> {
                               buildWhen: (previous, current) =>
                                   current is AddressAdding ||
                                   current is AddressAdded ||
-                                  current is AddressField,
+                                  current is AddressError,
                               builder: (context, state) {
                                 if (state is AddressAdding) {
                                   return CircularProgressIndicator(

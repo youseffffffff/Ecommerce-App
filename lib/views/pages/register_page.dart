@@ -202,6 +202,7 @@ class _RegisterState extends State<Register> {
                         cubit.register(
                           email: emailController.text,
                           password: passwordController.text,
+                          userName: nameController.text,
                         );
                       },
                       style: ElevatedButton.styleFrom(

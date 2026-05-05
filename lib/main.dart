@@ -1,3 +1,4 @@
+import 'package:ecommerce_app/models/product_items_model.dart';
 import 'package:ecommerce_app/utils/App_Router.dart';
 import 'package:ecommerce_app/utils/App_Routes.dart';
 import 'package:ecommerce_app/view_models/auth/auth_cubit.dart';
@@ -29,6 +30,7 @@ class DebugApp extends StatelessWidget {
       child: Builder(
         builder: (context) {
           final authCubit = BlocProvider.of<AuthCubit>(context);
+
           return MultiBlocProvider(
             providers: [
               BlocProvider(create: (_) => UserCubit()),
@@ -44,6 +46,22 @@ class DebugApp extends StatelessWidget {
               buildWhen: (previous, current) =>
                   current is AuthSuccess || current is AuthInitial,
               builder: (context, state) {
+                // BlocProvider.of<ProductCubit>(context).productsStream.listen((
+                //   allProducts,
+                // ) {
+                //   for (var product in allProducts) {
+                //     BlocProvider.of<ProductCubit>(
+                //       context,
+                //     ).deleteProduct(product.id);
+                //   }
+                // });
+
+                // for (int i = 0; i < products.length; i++) {
+                //   BlocProvider.of<ProductCubit>(
+                //     context,
+                //   ).addNewProduct(products[i]);
+                // }
+
                 return MaterialApp(
                   theme: ThemeData(),
                   //home: const BottomNavbar(),

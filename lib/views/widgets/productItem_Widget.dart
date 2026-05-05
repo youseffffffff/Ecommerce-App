@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:ecommerce_app/models/product_items_model.dart';
 import 'package:ecommerce_app/utils/app_colors.dart';
+import 'package:ecommerce_app/utils/current_user.dart';
 import 'package:ecommerce_app/view_models/checkout/cubit/checkout_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -19,7 +20,9 @@ class _ProductItemState extends State<ProductItem> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      BlocProvider.of<CheckoutCubit>(context).loadCheckout();
+      // BlocProvider.of<CheckoutCubit>(
+      //   context,
+      // ).loadCheckoutFromServer(currentUser!.id);
     });
   }
 

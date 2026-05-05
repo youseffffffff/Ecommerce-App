@@ -15,27 +15,23 @@ class CartItem {
       quantity: quantity ?? this.quantity,
     );
   }
-}
 
-List<CartItem> cartItems = [
-  CartItem(
-    product: Product(
-      id: 6,
-      name: 'Polo Shirt',
-      imageUrl:
-          'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
-      price: 59,
-      category: 'Shirt',
-      averageRate: 4.9,
-      availableSizes: [
-        ProductSize.S,
-        ProductSize.M,
-        ProductSize.L,
-        ProductSize.XL,
-      ],
-      availableColors: [Colors.white, Colors.blueGrey, Colors.brown],
-    ),
-    quantity: 3,
-    size: ProductSize.S,
-  ),
-];
+  Map<String, dynamic> toMap() {
+    return {
+      'product': product.toMap(),
+      'size': size.toString(),
+      'quantity': quantity,
+    };
+  }
+
+  factory CartItem.fromMap(Map<String, dynamic> map) {
+    return CartItem(
+      product: Product.fromMap(map['product'] as Map<String, dynamic>),
+      size: ProductSize.values.firstWhere(
+        (e) => e.toString() == map['size'],
+        orElse: () => ProductSize.none,
+      ),
+      quantity: map['quantity'] ?? 1,
+    );
+  }
+}

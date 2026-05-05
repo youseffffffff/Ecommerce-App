@@ -13,6 +13,27 @@ class Address {
         'https://www.iconpacks.net/icons/1/free-pin-icon-48-thumb.png',
     this.isChosen = false,
   });
+  factory Address.fromMap(Map<String, dynamic> map) {
+    return Address(
+      id: map['id'] ?? '',
+      city: map['city'] ?? '',
+      country: map['country'] ?? '',
+      imgUrl:
+          map['imgUrl'] ??
+          'https://www.iconpacks.net/icons/1/free-pin-icon-48-thumb.png',
+      isChosen: map['isChosen'] ?? false,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'city': city,
+      'country': country,
+      'imgUrl': imgUrl,
+      'isChosen': isChosen,
+    };
+  }
 
   Address copyWith({
     String? id,
@@ -30,9 +51,3 @@ class Address {
     );
   }
 }
-
-List<Address> addresses = [
-  Address(id: '1', city: 'maddina', country: 'saudi'),
-  Address(id: '2', city: 'riyadh', country: 'saudi'),
-  Address(id: '3', city: 'jeddah', country: 'saudi'),
-];

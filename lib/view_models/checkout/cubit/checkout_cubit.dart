@@ -2,25 +2,28 @@ import 'package:bloc/bloc.dart';
 import 'package:ecommerce_app/models/address.dart';
 import 'package:ecommerce_app/models/cart.items.model.dart';
 import 'package:ecommerce_app/models/paymentMethod.model.dart';
+import 'package:ecommerce_app/utils/current_user.dart';
 import 'package:meta/meta.dart';
+import 'package:ecommerce_app/services/users_services.dart';
 
 part 'checkout_state.dart';
 
 class CheckoutCubit extends Cubit<CheckoutState> {
+  final UserService _userService = UserService();
   CheckoutCubit() : super(CheckoutInitial());
 
   String currentCardId = paymentMethods.first.Id;
-  String currentAddressId = addresses.first.id;
+  String currentAddressId = '0';
 
-  void loadCheckout() {
+  Future<void> loadCheckoutFromServer(String userId) async {
     emit(CheckoutLoading());
-
-    Future.delayed(Duration(seconds: 2), () {
+    try {
+      final cartItems = await _userService.getCartItems(userId);
+      final addresses = await _userService.getAllAddresses(userId);
       double subTotalAmount = cartItems.fold(
         0.0,
         (total, item) => total + item.quantity * item.product.price,
       );
-
       emit(
         CheckoutLoaded(
           Items: cartItems,
@@ -29,7 +32,9 @@ class CheckoutCubit extends Cubit<CheckoutState> {
           addresses: addresses,
         ),
       );
-    });
+    } catch (e) {
+      emit(CheckoutError(message: 'فشل تحميل السلة: ${e.toString()}'));
+    }
   }
 
   void addPayemntMethod({required PaymentMethod method}) {
@@ -76,54 +81,134 @@ class CheckoutCubit extends Cubit<CheckoutState> {
     });
   }
 
-  void addAddress({required String address}) {
+  Future<void> loadAddress(String userId) async {
+    emit(AddressLoading());
+
+    try {
+      final addresses = await _userService.getAllAddresses(userId);
+      emit(AddressLoaded(addresses: addresses));
+    } catch (e) {
+      emit(AddressError(message: e.toString()));
+    }
+  }
+
+  // 🔹 ADD (عن طريق service)
+  Future<void> addAddress({required String address}) async {
     emit(AddressAdding());
 
-    Future.delayed(Duration(seconds: 2), () {
-      final splitAddres = address.split('-');
+    try {
+      final split = address.split('-');
 
       final addressItem = Address(
         id: DateTime.now().toIso8601String(),
-        city: splitAddres[0],
-        country: splitAddres[1],
+        city: split[0],
+        country: split[1],
       );
-      addresses.add(addressItem);
+
+      await _userService.addNewAddress(currentUser!.id, addressItem);
+
+      final updated = await _userService.getAllAddresses(currentUser!.id);
 
       emit(AddressAdded());
-      emit(AddressLoaded(addresses: addresses));
-    });
+      emit(AddressLoaded(addresses: updated));
+    } catch (e) {
+      emit(AddressError(message: e.toString()));
+    }
   }
 
-  void loadAddress() {
-    emit(AddressLoading());
+  // 🔹 DELETE
+  Future<void> deleteAddress(String addressId) async {
+    try {
+      await _userService.deleteAddress(currentUser!.id, addressId);
 
-    Future.delayed(Duration(seconds: 2), () {
-      emit(AddressLoaded(addresses: addresses));
-    });
+      final updated = await _userService.getAllAddresses(currentUser!.id);
+
+      emit(AddressLoaded(addresses: updated));
+    } catch (e) {
+      emit(AddressError(message: e.toString()));
+    }
   }
 
-  void changeAddressChosen(String Id) {
-    currentAddressId = Id;
-    emit(AddressChanged(addressId: Id));
+  // 🔹 اختيار مؤقت
+  void changeAddressChosen(String id) {
+    currentAddressId = id;
+    emit(AddressChanged(addressId: id));
   }
 
-  void confirmAddressChosen() {
+  // 🔥 CONFIRM (عن طريق service فقط)
+  Future<void> confirmAddressChosen() async {
     emit(AddressChoosing());
 
-    Future.delayed(Duration(seconds: 2), () {
-      int current = addresses.indexWhere(
-        (address) => address.id == currentAddressId,
-      );
+    try {
+      final addresses = await _userService.getAllAddresses(currentUser!.id);
 
-      int previes = addresses.indexWhere((address) => address.isChosen);
+      for (var address in addresses) {
+        final updated = address.copyWith(
+          isChosen: address.id == currentAddressId,
+        );
 
-      previes = previes == -1 ? 0 : previes;
+        await _userService.addNewAddress(currentUser!.id, updated);
+      }
 
-      addresses[current] = addresses[current].copyWith(isChosen: true);
+      final updatedList = await _userService.getAllAddresses(currentUser!.id);
 
-      addresses[previes] = addresses[previes].copyWith(isChosen: false);
+      final chosen = updatedList.firstWhere((a) => a.id == currentAddressId);
 
-      emit(AddressChoosen(address: addresses[current]));
-    });
+      emit(AddressChoosen(addressId: chosen.id));
+      emit(AddressLoaded(addresses: updatedList));
+    } catch (e) {
+      emit(AddressError(message: e.toString()));
+    }
+
+    // void addAddress({required String address}) {
+    //   emit(AddressAdding());
+
+    //   Future.delayed(Duration(seconds: 2), () {
+    //     final splitAddres = address.split('-');
+
+    //     final addressItem = Address(
+    //       id: DateTime.now().toIso8601String(),
+    //       city: splitAddres[0],
+    //       country: splitAddres[1],
+    //     );
+    //     addresses.add(addressItem);
+
+    //     emit(AddressAdded());
+    //     emit(AddressLoaded(addresses: addresses));
+    //   });
+    // }
+
+    // void loadAddress() {
+    //   emit(AddressLoading());
+
+    //   Future.delayed(Duration(seconds: 2), () {
+    //     emit(AddressLoaded(addresses: addresses));
+    //   });
+    // }
+
+    // void changeAddressChosen(String Id) {
+    //   currentAddressId = Id;
+    //   emit(AddressChanged(addressId: Id));
+    // }
+
+    // void confirmAddressChosen() {
+    //   emit(AddressChoosing());
+
+    //   Future.delayed(Duration(seconds: 2), () {
+    //     int current = addresses.indexWhere(
+    //       (address) => address.id == currentAddressId,
+    //     );
+
+    //     int previes = addresses.indexWhere((address) => address.isChosen);
+
+    //     previes = previes == -1 ? 0 : previes;
+
+    //     addresses[current] = addresses[current].copyWith(isChosen: true);
+
+    //     addresses[previes] = addresses[previes].copyWith(isChosen: false);
+
+    //     emit(AddressChoosen(address: addresses[current]));
+    //   });
+    // }
   }
 }

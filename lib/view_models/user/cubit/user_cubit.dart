@@ -1,41 +1,70 @@
 import 'package:bloc/bloc.dart';
 import 'package:ecommerce_app/models/user.dart';
 import 'package:meta/meta.dart';
+import 'package:ecommerce_app/services/users_services.dart';
 
 part 'user_state.dart';
 
 class UserCubit extends Cubit<UserState> {
+  final UserService _userService = UserService();
   UserCubit() : super(UserInitial());
 
-  void findUser({required String email, required String password}) {
-    emit(UserSearching());
+  // إضافة مستخدم إلى Firestore
+  Future<void> addUserToFirestore(UserData user) async {
+    emit(UserAdding());
+    try {
+      await _userService.createUser(user);
+      emit(UserAdded(users: [user])); // يمكنك تعديلها حسب الحاجة
+    } catch (e) {
+      emit(UserAddField(message: e.toString()));
+    }
+  }
 
-    Future.delayed(Duration(seconds: 1), () {
-      final userIndex = users.indexWhere(
-        (user) => user.email == email && user.password == password,
-      );
-      if (userIndex != -1) {
-        emit(UserSearched(user: users[userIndex]));
+  // جلب مستخدم من Firestore
+  Future<void> getUserFromFirestore(String id) async {
+    emit(UserSearching());
+    try {
+      final user = await _userService.getUserById(id);
+      if (user != null) {
+        emit(UserSearched(user: user));
       } else {
         emit(UserSearchNotFound());
       }
-    });
+    } catch (e) {
+      emit(UserSearchField(message: e.toString()));
+    }
   }
 
-  void addUser({required UserData user}) {
-    emit(UserAdding());
+  // // تحديث مستخدم في Firestore
+  // Future<void> updateUserInFirestore(UserData user) async {
+  //   emit(UserUpdating());
+  //   try {
+  //     await _userService.updateUser(user);
+  //     emit(UserUpdated(user: user));
+  //   } catch (e) {
+  //     emit(UserAddField(message: e.toString()));
+  //   }
+  // }
 
-    Future.delayed(Duration(seconds: 1), () {
-      users.add(
-        UserData(
-          id: user.id,
-          email: user.email,
-          fullName: user.fullName,
-          password: user.password,
-        ),
-      );
+  // // حذف مستخدم من Firestore
+  // Future<void> deleteUserFromFirestore(String id) async {
+  //   emit(UserDeleting());
+  //   try {
+  //     await _userService.deleteUser(id);
+  //     emit(UserDeleted(id: id));
+  //   } catch (e) {
+  //     emit(UserError(message: e.toString()));
+  //   }
+  // }
 
-      emit(UserAdded(users: users));
-    });
-  }
+  // جلب جميع المستخدمين
+  // Future<void> getAllUsersFromFirestore() async {
+  //   emit(UserLoading());
+  //   try {
+  //     final users = await _userService.getAllUsers();
+  //     emit(UserLoaded(users: users));
+  //   } catch (e) {
+  //     emit(UserError(message: e.toString()));
+  //   }
+  // }
 }

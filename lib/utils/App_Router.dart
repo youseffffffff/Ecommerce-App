@@ -1,6 +1,7 @@
 import 'package:ecommerce_app/models/cart.items.model.dart';
 import 'package:ecommerce_app/models/product_items_model.dart';
 import 'package:ecommerce_app/utils/App_Routes.dart';
+import 'package:ecommerce_app/utils/current_user.dart';
 import 'package:ecommerce_app/view_models/auth/auth_cubit.dart';
 import 'package:ecommerce_app/view_models/checkout/cubit/checkout_cubit.dart';
 import 'package:ecommerce_app/view_models/home/cubit/Home_cubit.dart';
@@ -50,12 +51,11 @@ class AppRouters {
         break;
 
       case AppRoutes.productDetails:
-        int id = routeSettings.arguments as int;
-
+        String id = routeSettings.arguments.toString();
         return MaterialPageRoute(
           builder: (_) => BlocProvider(
             create: (context) => ProductCubit()..loadProductDetails(id),
-            child: ProductDetails(),
+            child: ProductDetails(productID: id),
           ),
           settings: routeSettings,
         );
@@ -64,7 +64,8 @@ class AppRouters {
       case AppRoutes.checkout:
         return MaterialPageRoute(
           builder: (_) => BlocProvider(
-            create: (context) => CheckoutCubit()..loadCheckout(),
+            create: (context) =>
+                CheckoutCubit()..loadCheckoutFromServer(currentUser!.id),
             child: CheckoutWidget(),
           ),
           settings: routeSettings,
@@ -84,7 +85,7 @@ class AppRouters {
       case AppRoutes.address:
         return MaterialPageRoute(
           builder: (_) => BlocProvider(
-            create: (context) => CheckoutCubit()..loadAddress(),
+            create: (context) => CheckoutCubit()..loadAddress(currentUser!.id),
             child: AddressPage(),
           ),
           settings: routeSettings,
