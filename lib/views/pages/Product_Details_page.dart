@@ -21,7 +21,8 @@ class _ProductDetailsState extends State<ProductDetails> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final cubit = BlocProvider.of<ProductCubit>(context);
+    final cubit = BlocProvider.of<ProductCubit>(context)
+      ..getAllFavorites(currentUser!.id);
 
     Product productDetails;
 
@@ -71,34 +72,35 @@ class _ProductDetailsState extends State<ProductDetails> {
               actions: [
                 BlocBuilder<ProductCubit, ProductState>(
                   buildWhen: (previous, current) =>
-                      current is ProductFavoriteChanged ||
-                      current is ProductLoaded,
+                      current is FavoriteLoaded || current is ProductLoaded,
 
                   bloc: cubit,
 
                   builder: (context, state) {
-                    if (state is ProductFavoriteChanged) {
+                    if (state is FavoriteLoaded) {
                       return IconButton(
                         icon: Icon(
-                          state.product.isFavorite
+                          state.favoriteItems.any(
+                                (i) => i.id == productDetails.id,
+                              )
                               ? Icons.favorite
                               : Icons.favorite_border,
                           color: AppColors.black,
                         ),
-                        onPressed: () {
-                          cubit.changeFavoriteStatus(state.product);
-                        },
-                      );
-                    } else if (state is ProductLoaded) {
-                      return IconButton(
-                        icon: Icon(
-                          state.product.isFavorite
-                              ? Icons.favorite
-                              : Icons.favorite_border,
-                          color: AppColors.black,
-                        ),
-                        onPressed: () {
-                          cubit.changeFavoriteStatus(state.product);
+                        onPressed: () async {
+                          if (state.favoriteItems.any(
+                            (i) => i.id == productDetails.id,
+                          )) {
+                            await cubit.removeFromFavorites(
+                              currentUser!.id,
+                              productDetails.id,
+                            );
+                          } else {
+                            await cubit.addToFavorites(
+                              currentUser!.id,
+                              productDetails.id,
+                            );
+                          }
                         },
                       );
                     } else {
@@ -112,7 +114,7 @@ class _ProductDetailsState extends State<ProductDetails> {
               children: [
                 // Space for the image
                 CachedNetworkImage(
-                  imageUrl: state.product.imageUrl,
+                  imageUrl: productDetails.imageUrl,
 
                   errorWidget: (context, url, error) => Container(
                     height: size.height * 0.3,

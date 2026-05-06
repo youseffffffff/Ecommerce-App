@@ -90,3 +90,13 @@ class AddressError extends CheckoutState {
 
   AddressError({required this.message});
 }
+
+class OrderPaying extends CheckoutState {}
+
+class OrderPayed extends CheckoutState {}
+
+class OrderError extends CheckoutState {
+  final String message;
+
+  OrderError({required this.message});
+}

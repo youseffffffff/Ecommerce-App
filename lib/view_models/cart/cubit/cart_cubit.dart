@@ -12,12 +12,12 @@ class CartCubit extends Cubit<CartState> {
 
   // جلب جميع عناصر السلة من Firestore
   Future<void> fetchCartItems(String userId) async {
-    emit(CartLoading());
+    if (!isClosed) emit(CartLoading());
     try {
       final items = await _userService.getCartItems(userId);
-      emit(CartLoaded(items));
+      if (!isClosed) emit(CartLoaded(items));
     } catch (e) {
-      emit(CartError('Failed to load cart items'));
+      if (!isClosed) emit(CartError('Failed to load cart items'));
     }
   }
 
@@ -28,6 +28,16 @@ class CartCubit extends Cubit<CartState> {
       fetchCartItems(userId); // تحديث القائمة بعد الإضافة
     } catch (e) {
       emit(CartError('Failed to add cart item'));
+    }
+  }
+
+  Future<void> clearCart(String userId) async {
+    emit(CartLoading());
+    try {
+      await _userService.clearCart(userId);
+      fetchCartItems(userId); // تحديث القائمة بعد الإضافة
+    } catch (e) {
+      emit(CartError('Failed to clear cart'));
     }
   }
 

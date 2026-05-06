@@ -7,4 +7,12 @@ class ApiPaths {
 
   static String cartForUser() => 'itemsCart';
   static String addressesForUser() => 'addresses';
+
+  static String cardsForUser() => 'usercards';
+
+  static String favoriteProductsForUser() => 'favoriteProducts';
+  static String favoriteProductForUser({required String productId}) =>
+      'favoriteProducts/$productId';
+
+  static String ordersForUser() => 'orders';
 }

@@ -1,7 +1,9 @@
 import 'package:bloc/bloc.dart';
 import 'package:ecommerce_app/models/address.dart';
 import 'package:ecommerce_app/models/cart.items.model.dart';
+import 'package:ecommerce_app/models/order.dart';
 import 'package:ecommerce_app/models/paymentMethod.model.dart';
+import 'package:ecommerce_app/models/product_items_model.dart';
 import 'package:ecommerce_app/utils/current_user.dart';
 import 'package:meta/meta.dart';
 import 'package:ecommerce_app/services/users_services.dart';
@@ -12,7 +14,7 @@ class CheckoutCubit extends Cubit<CheckoutState> {
   final UserService _userService = UserService();
   CheckoutCubit() : super(CheckoutInitial());
 
-  String currentCardId = paymentMethods.first.Id;
+  String currentCardId = '';
   String currentAddressId = '0';
 
   Future<void> loadCheckoutFromServer(String userId) async {
@@ -20,6 +22,7 @@ class CheckoutCubit extends Cubit<CheckoutState> {
     try {
       final cartItems = await _userService.getCartItems(userId);
       final addresses = await _userService.getAllAddresses(userId);
+      final cards = await _userService.getAllCards(userId);
       double subTotalAmount = cartItems.fold(
         0.0,
         (total, item) => total + item.quantity * item.product.price,
@@ -28,7 +31,7 @@ class CheckoutCubit extends Cubit<CheckoutState> {
         CheckoutLoaded(
           Items: cartItems,
           totalAmount: subTotalAmount + 10,
-          Paymentmethods: paymentMethods,
+          Paymentmethods: cards,
           addresses: addresses,
         ),
       );
@@ -37,22 +40,38 @@ class CheckoutCubit extends Cubit<CheckoutState> {
     }
   }
 
-  void addPayemntMethod({required PaymentMethod method}) {
+  Future<void> addPayemntMethod({
+    required String userId,
+    required PaymentMethod method,
+  }) async {
     emit(PaymentMethodAdding());
-
-    Future.delayed(Duration(seconds: 2), () {
-      paymentMethods.add(method);
-
+    try {
+      await _userService.addNewCard(userId, method);
       emit(PaymentMethodAdded());
-    });
+      await loadPaymentMethod(userId: userId);
+    } catch (e) {
+      emit(CheckoutError(message: 'فشل إضافة البطاقة: ${e.toString()}'));
+    }
   }
 
-  void loadPaymentMethod() {
+  Future<void> loadPaymentMethod({required String userId}) async {
     emit(PaymentMethodsLoading());
+    try {
+      final cards = await _userService.getAllCards(userId);
+      emit(PaymentMethodsLoaded(paymentmethod: cards));
+    } catch (e) {
+      emit(CheckoutError(message: 'فشل تحميل البطاقات: ${e.toString()}'));
+    }
+  }
 
-    Future.delayed(Duration(seconds: 2), () {
-      emit(PaymentMethodsLoaded(paymentmethod: paymentMethods));
-    });
+  Future<void> addOrder(UserOrder order) async {
+    emit(OrderPaying());
+    try {
+      await _userService.addNewOrder(order);
+      emit(OrderPayed());
+    } catch (e) {
+      emit(OrderError(message: e.toString()));
+    }
   }
 
   void changeCardChosen(String Id) {
@@ -60,25 +79,26 @@ class CheckoutCubit extends Cubit<CheckoutState> {
     emit(PaymentMethodChanged(currentCardId: Id));
   }
 
-  void confirmCardChosen() {
+  Future<void> confirmCardChosen({required String userId}) async {
     emit(PaymentMethodChoosing());
-    Future.delayed(Duration(seconds: 2), () {
-      int current = paymentMethods.indexWhere(
-        (method) => method.Id == currentCardId,
-      );
-      int previes = paymentMethods.indexWhere((method) => method.isChosen);
-
+    try {
+      final cards = await _userService.getAllCards(userId);
+      int current = cards.indexWhere((method) => method.Id == currentCardId);
+      int previes = cards.indexWhere((method) => method.isChosen);
       previes = previes == -1 ? 0 : previes;
 
-      paymentMethods[current] = paymentMethods[current].copyWith(
-        isChosen: true,
-      );
-      paymentMethods[previes] = paymentMethods[previes].copyWith(
-        isChosen: false,
-      );
+      // Update chosen state in Firestore
+      for (int i = 0; i < cards.length; i++) {
+        final updated = cards[i].copyWith(isChosen: i == current);
+        await _userService.addNewCard(userId, updated);
+      }
 
-      emit(PaymentMethodChoosen(paymentMethod: paymentMethods[current]));
-    });
+      final updatedCards = await _userService.getAllCards(userId);
+      emit(PaymentMethodChoosen(paymentMethod: updatedCards[current]));
+      emit(PaymentMethodsLoaded(paymentmethod: updatedCards));
+    } catch (e) {
+      emit(CheckoutError(message: 'فشل تأكيد البطاقة: ${e.toString()}'));
+    }
   }
 
   Future<void> loadAddress(String userId) async {
@@ -136,11 +156,13 @@ class CheckoutCubit extends Cubit<CheckoutState> {
   }
 
   // 🔥 CONFIRM (عن طريق service فقط)
-  Future<void> confirmAddressChosen() async {
+  Future<void> confirmAddressChosen({required String userId}) async {
     emit(AddressChoosing());
 
     try {
-      final addresses = await _userService.getAllAddresses(currentUser!.id);
+      final List<Address> addresses = await _userService.getAllAddresses(
+        userId,
+      );
 
       for (var address in addresses) {
         final updated = address.copyWith(
@@ -150,7 +172,9 @@ class CheckoutCubit extends Cubit<CheckoutState> {
         await _userService.addNewAddress(currentUser!.id, updated);
       }
 
-      final updatedList = await _userService.getAllAddresses(currentUser!.id);
+      final List<Address> updatedList = await _userService.getAllAddresses(
+        currentUser!.id,
+      );
 
       final chosen = updatedList.firstWhere((a) => a.id == currentAddressId);
 

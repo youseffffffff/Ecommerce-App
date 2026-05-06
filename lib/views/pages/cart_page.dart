@@ -321,33 +321,62 @@ class _CartPageState extends State<CartPage> {
                               (subtotal + 10).toStringAsFixed(2),
                             ),
                             SizedBox(height: size.height * 0.05),
-                            ElevatedButton(
-                              onPressed: () {
-                                Navigator.of(
-                                  context,
-                                  rootNavigator: true,
-                                ).pushNamed(AppRoutes.checkout);
-                              },
+                            BlocConsumer<CartCubit, CartState>(
+                              bloc: cubit,
 
-                              child: Text(
-                                'Checkout',
-                                style: Theme.of(context).textTheme.titleMedium!
-                                    .copyWith(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
+                              listenWhen: (previous, current) =>
+                                  current is CartLoaded,
+
+                              listener:
+                                  (
+                                    BuildContext context,
+                                    CartState state,
+                                  ) async {
+                                    await cubit.fetchCartItems(currentUser!.id);
+                                  },
+
+                              builder: (context, state) {
+                                return ElevatedButton(
+                                  onPressed: () async {
+                                    await Navigator.of(
+                                      context,
+                                      rootNavigator: true,
+                                    ).pushNamed(AppRoutes.checkout).then((
+                                      _,
+                                    ) async {
+                                      await cubit.clearCart(currentUser!.id);
+                                    });
+                                  },
+                                  child: state is CartLoading
+                                      ? CircularProgressIndicator(
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                                Colors.white,
+                                              ),
+                                        )
+                                      : Text(
+                                          'Checkout',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleMedium!
+                                              .copyWith(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                        ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppColors.purple,
+
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: size.width * 0.4,
+                                      vertical: 15,
                                     ),
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.purple,
-
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: size.width * 0.4,
-                                  vertical: 15,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(24),
-                                ),
-                              ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(24),
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
                           ],
                         );

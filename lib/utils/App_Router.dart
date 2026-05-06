@@ -75,7 +75,8 @@ class AppRouters {
       case AppRoutes.paymentMethod:
         return MaterialPageRoute(
           builder: (_) => BlocProvider(
-            create: (context) => CheckoutCubit()..loadPaymentMethod(),
+            create: (context) =>
+                CheckoutCubit()..loadPaymentMethod(userId: currentUser!.id),
             child: PaymentMethodPage(),
           ),
           settings: routeSettings,

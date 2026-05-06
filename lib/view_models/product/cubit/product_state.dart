@@ -42,3 +42,17 @@ final class SizeSelected extends ProductState {
 final class CartIsAdding extends ProductState {}
 
 final class CartIsAdded extends ProductState {}
+
+class FavoriteLoading extends ProductState {}
+
+class FavoriteLoaded extends ProductState {
+  final List<Product> favoriteItems;
+
+  FavoriteLoaded({required this.favoriteItems});
+}
+
+class FavoriteError extends ProductState {
+  final String message;
+
+  FavoriteError({required this.message});
+}
