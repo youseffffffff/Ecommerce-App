@@ -3,6 +3,8 @@ import 'package:ecommerce_app/models/cart.items.model.dart';
 import 'package:ecommerce_app/models/product_items_model.dart';
 import 'package:ecommerce_app/services/preducts.dart';
 import 'package:ecommerce_app/services/users_services.dart';
+import 'package:ecommerce_app/utils/current_user.dart';
+import 'package:ecommerce_app/view_models/checkout/cubit/checkout_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
@@ -18,16 +20,6 @@ class ProductCubit extends Cubit<ProductState> {
 
   late ProductSize selectedSize = ProductSize.none;
   int quantity = 1;
-
-  void changeFavoriteStatus(Product product) {
-    var index = products.indexWhere((p) => p.id == product.id);
-
-    products[index] = products[index].copyWith(
-      isFavorite: !products[index].isFavorite,
-    );
-
-    emit(ProductFavoriteChanged(product: products[index]));
-  }
 
   Future<Product?> getProductById(String id) async {
     emit(ProductLoading());
@@ -126,6 +118,40 @@ class ProductCubit extends Cubit<ProductState> {
       emit(CartIsAdded());
     } catch (e) {
       emit(ProductError(message: 'فشل في إضافة المنتج للسلة: ${e.toString()}'));
+    }
+  }
+
+  Future<void> getAllFavorites(String userId) async {
+    emit(FavoriteLoading());
+    try {
+      final cartItems = await _userService.getAllFavorites(userId);
+      emit(FavoriteLoaded(favoriteItems: cartItems));
+    } catch (e) {
+      emit(ProductError(message: 'فشل في تحميل المفضلة: ${e.toString()}'));
+    }
+  }
+
+  Future<void> addToFavorites(String userId, String productId) async {
+    try {
+      await _userService.addNewFavorite(userId, productId);
+      await getAllFavorites(userId); // تحديث القائمة بعد الإضافة
+    } catch (e) {
+      emit(
+        ProductError(message: 'فشل في إضافة المنتج للمفضلة: ${e.toString()}'),
+      );
+    }
+  }
+
+  Future<void> removeFromFavorites(String userId, String productId) async {
+    try {
+      await _userService.deleteFavorite(userId, productId);
+      await getAllFavorites(userId); // تحديث القائمة بعد الحذف
+    } catch (e) {
+      emit(
+        ProductError(
+          message: 'فشل في إزالة المنتج من المفضلة: ${e.toString()}',
+        ),
+      );
     }
   }
 }

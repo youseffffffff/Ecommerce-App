@@ -1,5 +1,6 @@
 import 'package:ecommerce_app/utils/App_Routes.dart';
 import 'package:ecommerce_app/utils/app_colors.dart';
+import 'package:ecommerce_app/utils/current_user.dart';
 import 'package:ecommerce_app/view_models/checkout/cubit/checkout_cubit.dart';
 import 'package:ecommerce_app/views/widgets/full_PaymentMethod_Widget.dart';
 import 'package:flutter/material.dart';
@@ -17,7 +18,7 @@ class _PaymentMethodsItemsState extends State<PaymentMethodsItems> {
   Widget build(BuildContext context) {
     final cubit = BlocProvider.of<CheckoutCubit>(context);
     final size = MediaQuery.of(context).size;
-    cubit.loadPaymentMethod();
+    cubit.loadPaymentMethod(userId: currentUser!.id);
 
     return BlocBuilder<CheckoutCubit, CheckoutState>(
       bloc: cubit,
@@ -121,7 +122,7 @@ class _PaymentMethodsItemsState extends State<PaymentMethodsItems> {
                           context,
                           rootNavigator: true,
                         ).pushNamed(AppRoutes.paymentMethod).then((value) {
-                          cubit.loadPaymentMethod();
+                          cubit.loadPaymentMethod(userId: currentUser!.id);
                         });
                       },
                       child: Card(
@@ -143,7 +144,7 @@ class _PaymentMethodsItemsState extends State<PaymentMethodsItems> {
                     const SizedBox(height: 16),
                     InkWell(
                       onTap: () {
-                        cubit.confirmCardChosen();
+                        cubit.confirmCardChosen(userId: currentUser!.id);
                         Navigator.of(context).pop();
                       },
                       child: Card(

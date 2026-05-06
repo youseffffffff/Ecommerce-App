@@ -1,4 +1,5 @@
 import 'package:ecommerce_app/models/product_items_model.dart';
+import 'package:ecommerce_app/services/preducts.dart';
 import 'package:flutter/material.dart';
 
 class CartItem {
@@ -18,15 +19,19 @@ class CartItem {
 
   Map<String, dynamic> toMap() {
     return {
-      'product': product.toMap(),
+      'productId': product.id,
       'size': size.toString(),
       'quantity': quantity,
     };
   }
 
-  factory CartItem.fromMap(Map<String, dynamic> map) {
+  static Future<CartItem> fromMap(Map<String, dynamic> map) async {
+    Product product =
+        await ProductService().getProductById(map['productId'].toString())
+            as Product;
+
     return CartItem(
-      product: Product.fromMap(map['product'] as Map<String, dynamic>),
+      product: product,
       size: ProductSize.values.firstWhere(
         (e) => e.toString() == map['size'],
         orElse: () => ProductSize.none,

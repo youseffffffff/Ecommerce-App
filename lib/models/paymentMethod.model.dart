@@ -19,6 +19,32 @@ class PaymentMethod {
         'https://th.bing.com/th/id/OIP.XLxva8A-P8lZLn8yuU-aYgHaGL?w=218&h=182&c=7&r=0&o=7&dpr=2&pid=1.7&rm=3',
   });
 
+  factory PaymentMethod.fromMap(Map<String, dynamic> map) {
+    return PaymentMethod(
+      Id: map["Id"] ?? '',
+      CardNumber: map["CardNumber"] ?? '',
+      CardHolderName: map["CardHolderName"] ?? '',
+      ExpiryDate: map["ExpiryDate"] ?? '',
+      Cvv: map["Cvv"] ?? '',
+      isChosen: map["isChosen"] ?? false,
+      imgUrl:
+          map["imgUrl"] ??
+          'https://th.bing.com/th/id/OIP.XLxva8A-P8lZLn8yuU-aYgHaGL?w=218&h=182&c=7&r=0&o=7&dpr=2&pid=1.7&rm=3',
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      "Id": Id,
+      "CardNumber": CardNumber,
+      "CardHolderName": CardHolderName,
+      "ExpiryDate": ExpiryDate,
+      "Cvv": Cvv,
+      "isChosen": isChosen,
+      "imgUrl": imgUrl,
+    };
+  }
+
   PaymentMethod copyWith({
     String? Id,
     String? CardNumber,
@@ -39,27 +65,3 @@ class PaymentMethod {
     );
   }
 }
-
-List<PaymentMethod> paymentMethods = [
-  PaymentMethod(
-    Id: "1",
-    CardNumber: "111111111111111111111111",
-    CardHolderName: "Yousef",
-    ExpiryDate: "22/3",
-    Cvv: "123",
-  ),
-  PaymentMethod(
-    Id: "2",
-    CardNumber: "222222222222222222222222",
-    CardHolderName: "Ahmed",
-    ExpiryDate: "232/4",
-    Cvv: "456",
-  ),
-  PaymentMethod(
-    Id: "3",
-    CardNumber: "333333333333333333333333",
-    CardHolderName: "Gali",
-    ExpiryDate: "24/5",
-    Cvv: "789",
-  ),
-];

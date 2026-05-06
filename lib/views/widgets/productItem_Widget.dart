@@ -3,6 +3,7 @@ import 'package:ecommerce_app/models/product_items_model.dart';
 import 'package:ecommerce_app/utils/app_colors.dart';
 import 'package:ecommerce_app/utils/current_user.dart';
 import 'package:ecommerce_app/view_models/checkout/cubit/checkout_cubit.dart';
+import 'package:ecommerce_app/view_models/product/cubit/product_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -28,6 +29,9 @@ class _ProductItemState extends State<ProductItem> {
 
   @override
   Widget build(BuildContext context) {
+    final cubit = BlocProvider.of<ProductCubit>(context)
+      ..getAllFavorites(currentUser!.id);
+
     return LayoutBuilder(
       builder: (context, constraints) {
         return ClipRRect(
@@ -122,20 +126,53 @@ class _ProductItemState extends State<ProductItem> {
                         height: constraints.maxHeight * 0.145,
                         width: constraints.maxWidth * 0.145,
                         color: AppColors.black.withOpacity(0.4),
-                        child: IconButton(
-                          icon: Icon(
-                            widget.product.isFavorite
-                                ? Icons.favorite
-                                : Icons.favorite_border,
-                            color: AppColors.white,
-                            size: constraints.maxHeight * 0.07,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              widget.product = widget.product.copyWith(
-                                isFavorite: !widget.product.isFavorite,
+                        child: BlocBuilder<ProductCubit, ProductState>(
+                          bloc: cubit,
+
+                          builder: (context, state) {
+                            if (state is ProductLoading) {
+                              return Center(child: CircularProgressIndicator());
+                            } else if (state is ProductError) {
+                              return Center(child: Text(state.message));
+                            } else if (state is FavoriteLoaded) {
+                              /*
+                              return IconButton(
+                              icon: Icon(
+                                widget.product.isFavorite
+                                    ? Icons.favorite
+                                    : Icons.favorite_border,
+                                color: AppColors.white,
+                                size: constraints.maxHeight * 0.07,
+                              ),*/
+                              return IconButton(
+                                icon: Icon(
+                                  state.favoriteItems.any(
+                                        (i) => i.id == widget.product.id,
+                                      )
+                                      ? Icons.favorite
+                                      : Icons.favorite_border,
+                                  color: AppColors.white,
+                                  size: constraints.maxHeight * 0.07,
+                                ),
+                                onPressed: () async {
+                                  if (state.favoriteItems.any(
+                                    (i) => i.id == widget.product.id,
+                                  )) {
+                                    await cubit.removeFromFavorites(
+                                      currentUser!.id,
+                                      widget.product.id,
+                                    );
+                                  } else {
+                                    await cubit.addToFavorites(
+                                      currentUser!.id,
+                                      widget.product.id,
+                                    );
+                                  }
+                                },
                               );
-                            });
+                            } else {
+                              return SizedBox();
+                            }
                           },
                         ),
                       ),

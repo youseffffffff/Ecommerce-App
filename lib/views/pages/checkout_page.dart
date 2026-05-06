@@ -1,8 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:ecommerce_app/models/address.dart';
+import 'package:ecommerce_app/models/order.dart';
 import 'package:ecommerce_app/models/paymentMethod.model.dart';
 import 'package:ecommerce_app/utils/App_Routes.dart';
 import 'package:ecommerce_app/utils/current_user.dart';
+import 'package:ecommerce_app/view_models/cart/cubit/cart_cubit.dart';
 import 'package:ecommerce_app/views/widgets/empty_PaymentMethodOrAddress_Widget.dart';
 import 'package:ecommerce_app/views/widgets/full_Address_Widget.dart';
 import 'package:ecommerce_app/views/widgets/full_PaymentMethod_Widget.dart';
@@ -32,6 +34,7 @@ class _CheckoutWidgetState extends State<CheckoutWidget> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final checkoutCubit = BlocProvider.of<CheckoutCubit>(context);
+    final cartCubit = BlocProvider.of<CartCubit>(context);
 
     Widget addressWidget({required Address? address}) {
       if (address == null) {
@@ -289,23 +292,83 @@ class _CheckoutWidgetState extends State<CheckoutWidget> {
 
                   SizedBox(
                     width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.purple,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: const Text(
-                        "Proceed to Buy",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                    child: BlocConsumer<CheckoutCubit, CheckoutState>(
+                      listenWhen: (previous, current) => current is OrderPayed,
+
+                      bloc: checkoutCubit,
+                      listener: (context, state) async {
+                        if (state is OrderPayed) {
+                          
+
+                          await showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (context) {
+                              return AlertDialog(
+                                title: const Text('Order Placed'),
+                                content: const Text(
+                                  'Your order has been placed successfully!',
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: const Text('OK'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        }
+                      },
+
+                      buildWhen: (previous, current) =>
+                          current is OrderPayed ||
+                          current is OrderPaying ||
+                          current is OrderError,
+                      builder: (context, state) {
+                        return ElevatedButton(
+                          onPressed: () async {
+                            await checkoutCubit.addOrder(
+                              UserOrder(
+                                id: DateTime.now().toIso8601String(),
+                                userId: currentUser!.id,
+                                items: items,
+                              ),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.purple,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: state is OrderPayed
+                              ? Icon(Icons.check, color: Colors.green)
+                              : state is OrderPaying
+                              ? const CircularProgressIndicator.adaptive()
+                              : state is OrderError
+                              ? const Text(
+                                  "Error",
+                                  style: TextStyle(
+                                    color: Colors.red,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                )
+                              : const Text(
+                                  "Proceed to Buy",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                        );
+                      },
                     ),
                   ),
 

@@ -1,4 +1,5 @@
 import 'package:ecommerce_app/models/paymentMethod.model.dart';
+import 'package:ecommerce_app/utils/current_user.dart';
 import 'package:ecommerce_app/view_models/checkout/cubit/checkout_cubit.dart';
 import 'package:ecommerce_app/views/widgets/main_mutton_Widget.dart';
 import 'package:flutter/material.dart';
@@ -168,6 +169,7 @@ class _PaymentMethodPageState extends State<PaymentMethodPage> {
                               Cvv: _cvvController.text,
                             );
                             checkoutCubit.addPayemntMethod(
+                              userId: currentUser!.id,
                               method: paymentMethod,
                             );
                           }

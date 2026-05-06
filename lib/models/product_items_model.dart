@@ -109,77 +109,77 @@ class Product {
   }
 }
 
-List<Product> products = [
-  Product(
-    id: '1',
-    name: 'Bulova Watch',
-    imageUrl:
-        'https://images.unsplash.com/photo-1523275335684-37898b6baf30?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
-    price: 399,
-    category: 'Watch',
-    averageRate: 4.8,
-    availableColors: [Colors.black, Colors.brown, Colors.grey, Colors.yellow],
-    availableSizes: null,
-  ),
-  Product(
-    id: '2',
-    name: 'Zala bag',
-    imageUrl:
-        'https://images.unsplash.com/photo-1491553895911-0055eca6402d?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
-    price: 59,
-    category: 'Bag',
-    averageRate: 4.2,
-    availableColors: [Colors.black, Colors.brown, Colors.pink, Colors.red],
-  ),
-  Product(
-    id: '3',
-    name: 'Ayta Slippers',
-    imageUrl:
-        'https://images.unsplash.com/photo-1542291026-7eec264c27ff?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
-    price: 19,
-    category: 'Slippers',
-    averageRate: 4.5,
-    availableColors: [Colors.blueGrey, Colors.brown],
-  ),
-  Product(
-    id: '4',
-    name: 'Circle Earrings',
-    imageUrl:
-        'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
-    price: 99,
-    category: 'Accessories',
-    averageRate: 4.6,
-    availableColors: [Colors.amber, Colors.grey[400]],
-  ),
-  Product(
-    id: '5',
-    name: 'Sheepskin Leather',
-    imageUrl:
-        'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
-    price: 29,
-    category: 'Phone cover',
-    averageRate: 4.0,
-    availableColors: [
-      Colors.black,
-      Colors.deepPurple,
-      Colors.green,
-      Colors.orange,
-    ],
-  ),
-  Product(
-    id: '6',
-    name: 'Polo Shirt',
-    imageUrl:
-        'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
-    price: 59,
-    category: 'Shirt',
-    averageRate: 4.9,
-    availableSizes: [
-      ProductSize.S,
-      ProductSize.M,
-      ProductSize.L,
-      ProductSize.XL,
-    ],
-    availableColors: [Colors.white, Colors.blueGrey, Colors.brown],
-  ),
-];
+// List<Product> products = [
+//   Product(
+//     id: '1',
+//     name: 'Bulova Watch',
+//     imageUrl:
+//         'https://images.unsplash.com/photo-1523275335684-37898b6baf30?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
+//     price: 399,
+//     category: 'Watch',
+//     averageRate: 4.8,
+//     availableColors: [Colors.black, Colors.brown, Colors.grey, Colors.yellow],
+//     availableSizes: null,
+//   ),
+//   Product(
+//     id: '2',
+//     name: 'Zala bag',
+//     imageUrl:
+//         'https://images.unsplash.com/photo-1491553895911-0055eca6402d?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
+//     price: 59,
+//     category: 'Bag',
+//     averageRate: 4.2,
+//     availableColors: [Colors.black, Colors.brown, Colors.pink, Colors.red],
+//   ),
+//   Product(
+//     id: '3',
+//     name: 'Ayta Slippers',
+//     imageUrl:
+//         'https://images.unsplash.com/photo-1542291026-7eec264c27ff?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
+//     price: 19,
+//     category: 'Slippers',
+//     averageRate: 4.5,
+//     availableColors: [Colors.blueGrey, Colors.brown],
+//   ),
+//   Product(
+//     id: '4',
+//     name: 'Circle Earrings',
+//     imageUrl:
+//         'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
+//     price: 99,
+//     category: 'Accessories',
+//     averageRate: 4.6,
+//     availableColors: [Colors.amber, Colors.grey[400]],
+//   ),
+//   Product(
+//     id: '5',
+//     name: 'Sheepskin Leather',
+//     imageUrl:
+//         'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
+//     price: 29,
+//     category: 'Phone cover',
+//     averageRate: 4.0,
+//     availableColors: [
+//       Colors.black,
+//       Colors.deepPurple,
+//       Colors.green,
+//       Colors.orange,
+//     ],
+//   ),
+//   Product(
+//     id: '6',
+//     name: 'Polo Shirt',
+//     imageUrl:
+//         'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
+//     price: 59,
+//     category: 'Shirt',
+//     averageRate: 4.9,
+//     availableSizes: [
+//       ProductSize.S,
+//       ProductSize.M,
+//       ProductSize.L,
+//       ProductSize.XL,
+//     ],
+//     availableColors: [Colors.white, Colors.blueGrey, Colors.brown],
+//   ),
+// ];
